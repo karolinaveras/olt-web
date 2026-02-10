@@ -3,7 +3,6 @@
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![Flask](https://img.shields.io/badge/Flask-2.0%2B-lightgrey)
 ![Telnet](https://img.shields.io/badge/Telnet-Client-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-orange)
 
 Uma aplicação web para gerenciamento de OLTs GPON via Telnet, com interface intuitiva para descoberta e monitoramento de ONUs.
