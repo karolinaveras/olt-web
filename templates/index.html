@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLT GPON - GCTI</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .section {
+            padding: 25px 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 150px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #219653);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #219653, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496, #17a2b8);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        #status {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .status-connected {
+            background: linear-gradient(135deg, #d4efdf, #a9dfbf);
+            color: #145a32;
+            border-left-color: #27ae60;
+        }
+        
+        .status-disconnected {
+            background: linear-gradient(135deg, #fadbd8, #f5b7b1);
+            color: #78281f;
+            border-left-color: #e74c3c;
+        }
+        
+        .status-connecting {
+            background: linear-gradient(135deg, #fdebd0, #f8c471);
+            color: #7e5109;
+            border-left-color: #f39c12;
+        }
+        
+        #results {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            background: #2c3e50;
+            color: #ecf0f1;
+            resize: vertical;
+            white-space: pre;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        
+        #onu-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        #onu-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        #onu-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        #onu-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+        
+        #onu-table tr:hover {
+            background: #f8f9fa;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .pon-cell {
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 4px;
+            padding: 6px 10px;
+            text-align: center;
+            display: inline-block;
+            min-width: 60px;
+        }
+        
+        .onu-id-cell {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2196F3;
+            text-align: center;
+            padding: 4px 8px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 40px;
+        }
+        
+        .online {
+            color: #27ae60;
+            font-weight: bold;
+            background: #d4efdf;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .offline {
+            color: #e74c3c;
+            font-weight: bold;
+            background: #fadbd8;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .unknown {
+            color: #f39c12;
+            font-weight: bold;
+            background: #fdebd0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .serial-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #2c3e50;
+            background: #f8f9fa;
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            margin: 2px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        
+        .btn-optical {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-optical:hover {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #27ae60, #219653);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #219653, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-both {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+        
+        .btn-both:hover {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(155, 89, 182, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(120%);
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #27ae60, #219653);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .notification.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 10px;
+            }
+            
+            header {
+                padding: 20px;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            #onu-table {
+                font-size: 12px;
+            }
+            
+            #onu-table th, #onu-table td {
+                padding: 8px;
+            }
+            
+            .action-btn {
+                padding: 6px 8px;
+                font-size: 11px;
+            }
+            
+            .pon-cell, .onu-id-cell {
+                min-width: 40px;
+                padding: 4px 6px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <i class="fas fa-satellite-dish"></i>
+                <span>OLT GPON Manager - GCTI</span>
+            </h1>
+            <p class="subtitle">Desenvolvido pelo setor de Redes - GCTI</p>
+        </header>
+        
+        <div class="section">
+            <h2><i class="fas fa-wifi"></i> Configuração da OLT</h2>
+            <div class="config-grid">
+                <div class="input-group">
+                    <label for="host"><i class="fas fa-server"></i> IP da OLT *</label>
+                    <input type="text" id="host" placeholder="Ex: 192.168.100.1" required>
+                </div>
+                <div class="input-group">
+                    <label for="port"><i class="fas fa-plug"></i> Porta Telnet</label>
+                    <input type="number" id="port" placeholder="23" value="23">
+                </div>
+                <div class="input-group">
+                    <label for="username"><i class="fas fa-user"></i> Usuário</label>
+                    <input type="text" id="username" placeholder="root" value="root">
+                </div>
+                <div class="input-group">
+                    <label for="password"><i class="fas fa-key"></i> Senha</label>
+                    <input type="password" id="password" placeholder="••••••••" value="root">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="connectToOLT()">
+                    <i class="fas fa-link"></i> Conectar à OLT
+                </button>
+                <button class="btn btn-danger" onclick="disconnectFromOLT()">
+                    <i class="fas fa-unlink"></i> Desconectar
+                </button>
+            </div>
+        </div>
+        
+        <div id="status" class="status-disconnected">
+            <i class="fas fa-times-circle"></i>
+            <span>Desconectado - Configure a conexão acima</span>
+        </div>
+        
+        <div class="section">
+            <div class="table-header">
+                <h2><i class="fas fa-search"></i> Descoberta de ONUs</h2>
+                <div>
+                    <button class="btn btn-info" onclick="discoverONUs()" id="discoverBtn">
+                        <i class="fas fa-search"></i> Descobrir ONUs
+                    </button>
+                    <button class="btn btn-warning" onclick="clearONUList()">
+                        <i class="fas fa-trash"></i> Limpar Lista
+                    </button>
+                    <button class="btn" onclick="toggleDebug()" style="background: #95a5a6; color: white;">
+                        <i class="fas fa-bug"></i> Debug
+                    </button>
+                </div>
+            </div>
+            <p>Execute "show ont info all" para listar todas as ONUs conectadas</p>
+            
+            <div id="onu-table-container" style="display: none;">
+                <h3>ONUs Encontradas (<span id="onu-count">0</span>)</h3>
+                <table id="onu-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">PON</th>
+                            <th style="width: 100px;">ONU ID</th>
+                            <th style="width: 200px;">Serial Number</th>
+                            <th style="width: 120px;">Status</th>
+                            <th style="width: 300px;">Ações Rápidas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="onu-table-body">
+                        <!-- ONUs serão inseridas aqui -->
+                    </tbody>
+                </table>
+                <div id="debug-info" class="debug-info"></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2><i class="fas fa-microchip"></i> Consulta de ONU Específica</h2>
+            <div class="config-grid">
+                <div class="input-group">
+                    <label for="specific-pon"><i class="fas fa-hashtag"></i> PON (1-16)</label>
+                    <input type="number" id="specific-pon" placeholder="1" value="1" min="1" max="16">
+                </div>
+                <div class="input-group">
+                    <label for="specific-onu"><i class="fas fa-microchip"></i> ONU ID (1-128)</label>
+                    <input type="number" id="specific-onu" placeholder="1" value="1" min="1" max="128">
+                </div>
+                <div class="input-group">
+                    <label for="queryType"><i class="fas fa-list"></i> Tipo de Consulta</label>
+                    <select id="queryType">
+                        <option value="optical">Informação Óptica</option>
+                        <option value="info">Informação Geral</option>
+                        <option value="both">Ambas Consultas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="querySpecificONT()" id="queryBtn">
+                    <i class="fas fa-play"></i> Consultar ONU
+                </button>
+                <button class="btn btn-warning" onclick="clearResults()">
+                    <i class="fas fa-broom"></i> Limpar Resultados
+                </button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="table-header">
+                <h2><i class="fas fa-file-alt"></i> Resultados da Consulta</h2>
+                <button class="btn btn-warning" onclick="clearResults()">
+                    <i class="fas fa-trash"></i> Limpar
+                </button>
+            </div>
+            <textarea id="results" readonly placeholder="Os resultados das consultas aparecerão aqui..."></textarea>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        let isConnected = false;
+        let discoveredONUs = [];
+        let debugMode = false;
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+        
+        function updateStatus(status, message) {
+            const statusElement = document.getElementById('status');
+            const queryBtn = document.getElementById('queryBtn');
+            const discoverBtn = document.getElementById('discoverBtn');
+            
+            switch(status) {
+                case 'connected':
+                    statusElement.className = 'status-connected';
+                    statusElement.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span>`;
+                    queryBtn.disabled = false;
+                    discoverBtn.disabled = false;
+                    isConnected = true;
+                    break;
+                case 'disconnected':
+                    statusElement.className = 'status-disconnected';
+                    statusElement.innerHTML = `<i class="fas fa-times-circle"></i><span>${message}</span>`;
+                    queryBtn.disabled = true;
+                    discoverBtn.disabled = true;
+                    isConnected = false;
+                    document.getElementById('onu-table-container').style.display = 'none';
+                    break;
+                case 'connecting':
+                    statusElement.className = 'status-connecting';
+                    statusElement.innerHTML = `<div class="loading"></div><span>${message}</span>`;
+                    queryBtn.disabled = true;
+                    discoverBtn.disabled = true;
+                    break;
+                case 'discovering':
+                    statusElement.className = 'status-connecting';
+                    statusElement.innerHTML = `<div class="loading"></div><span>${message}</span>`;
+                    queryBtn.disabled = true;
+                    discoverBtn.disabled = true;
+                    break;
+                case 'querying':
+                    statusElement.className = 'status-connecting';
+                    statusElement.innerHTML = `<div class="loading"></div><span>${message}</span>`;
+                    queryBtn.disabled = true;
+                    discoverBtn.disabled = true;
+                    break;
+            }
+        }
+        
+        async function connectToOLT() {
+            const host = document.getElementById('host').value.trim();
+            const port = document.getElementById('port').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!host) {
+                showNotification('Por favor, informe o IP da OLT', 'error');
+                return;
+            }
+            
+            updateStatus('connecting', `Conectando à ${host}...`);
+            
+            try {
+                const response = await fetch('/connect', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({host, port, username, password})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus('connected', result.message);
+                    showNotification('Conexão estabelecida com sucesso!', 'success');
+                } else {
+                    updateStatus('disconnected', 'Falha na conexão');
+                    showNotification(`Erro: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                updateStatus('disconnected', 'Erro de conexão');
+                showNotification(`Erro de rede: ${error.message}`, 'error');
+            }
+        }
+        
+        async function discoverONUs() {
+            if (!isConnected) {
+                showNotification('Conecte-se à OLT primeiro', 'warning');
+                return;
+            }
+            
+            updateStatus('discovering', 'Executando "show ont info all"...');
+            
+            try {
+                const response = await fetch('/discover-onus', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    discoveredONUs = result.onu_list;
+                    updateStatus('connected', `Encontradas ${result.onu_count} ONUs`);
+                    showNotification(`Descoberta concluída: ${result.onu_count} ONUs encontradas`, 'success');
+                    
+                    updateONUTable(discoveredONUs);
+                    document.getElementById('onu-table-container').style.display = 'block';
+                    
+                    // Debug no console e na interface
+                    if (debugMode) {
+                        console.log('ONUs descobertas:', discoveredONUs);
+                        document.getElementById('debug-info').innerHTML = 
+                            `<strong>Dados brutos (primeiras 5 ONUs):</strong><br>` +
+                            JSON.stringify(discoveredONUs.slice(0, 5), null, 2);
+                        document.getElementById('debug-info').style.display = 'block';
+                    }
+                } else {
+                    updateStatus('connected', 'Erro na descoberta');
+                    showNotification(`Erro: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                updateStatus('connected', 'Erro na descoberta');
+                showNotification(`Erro: ${error.message}`, 'error');
+            }
+        }
+        
+        function updateONUTable(onus) {
+            const tableBody = document.getElementById('onu-table-body');
+            const onuCount = document.getElementById('onu-count');
+            
+            tableBody.innerHTML = '';
+            onuCount.textContent = onus.length;
+            
+            if (onus.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 24px; color: #f39c12; margin-bottom: 10px; display: block;"></i>
+                        <h3>Nenhuma ONU encontrada</h3>
+                        <p>Verifique a conexão com a OLT e tente novamente.</p>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            onus.forEach((onu, index) => {
+                const row = document.createElement('tr');
+                
+                let statusClass = 'unknown';
+                let statusIcon = '❓';
+                let statusText = onu.status || 'Unknown';
+                
+                if (onu.status === 'Online') {
+                    statusClass = 'online';
+                    statusIcon = '✅';
+                    statusText = 'Online';
+                } else if (onu.status === 'Offline') {
+                    statusClass = 'offline';
+                    statusIcon = '🔴';
+                    statusText = 'Offline';
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="pon-cell">PON ${onu.pon}</div>
+                    </td>
+                    <td style="text-align: center;">
+                        <div class="onu-id-cell">${onu.onu_id}</div>
+                    </td>
+                    <td>
+                        <div class="serial-cell">
+                            <i class="fas fa-fingerprint" style="margin-right: 5px; color: #3498db;"></i>
+                            ${onu.serial || 'N/A'}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="${statusClass}">
+                            ${statusIcon} ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-optical" onclick="queryONTFromTable('${onu.pon}', '${onu.onu_id}', 'optical')">
+                                <i class="fas fa-broadcast-tower"></i> Óptico
+                            </button>
+                            <button class="action-btn btn-info" onclick="queryONTFromTable('${onu.pon}', '${onu.onu_id}', 'info')">
+                                <i class="fas fa-info-circle"></i> Info
+                            </button>
+                            <button class="action-btn btn-both" onclick="queryONTFromTable('${onu.pon}', '${onu.onu_id}', 'both')">
+                                <i class="fas fa-search"></i> Ambos
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                // Clicar na linha preenche os campos
+                row.onclick = (e) => {
+                    if (!e.target.closest('button')) {
+                        document.getElementById('specific-pon').value = onu.pon;
+                        document.getElementById('specific-onu').value = onu.onu_id;
+                        showNotification(`PON ${onu.pon} ONU ${onu.onu_id} selecionada - ${onu.serial}`, 'info');
+                    }
+                };
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        async function queryONTFromTable(pon, onuId, type) {
+            document.getElementById('specific-pon').value = pon;
+            document.getElementById('specific-onu').value = onuId;
+            document.getElementById('queryType').value = type;
+            
+            await querySpecificONT();
+        }
+        
+        async function querySpecificONT() {
+            if (!isConnected) {
+                showNotification('Conecte-se à OLT primeiro', 'warning');
+                return;
+            }
+            
+            const pon = document.getElementById('specific-pon').value;
+            const onuId = document.getElementById('specific-onu').value;
+            const queryType = document.getElementById('queryType').value;
+            
+            if (!pon || !onuId) {
+                showNotification('Informe PON e ONU ID', 'warning');
+                return;
+            }
+            
+            updateStatus('querying', `Consultando PON ${pon} ONU ${onuId}...`);
+            
+            try {
+                const response = await fetch('/query-ont', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        pon: pon,
+                        onu_id: onuId,
+                        type: queryType
+                    })
+                });
+                
+                const result = await response.json();
+                const textarea = document.getElementById('results');
+                
+                if (result.success) {
+                    let output = `=== CONSULTA EXECUTADA ===\n`;
+                    output += `Data/Hora: ${new Date().toLocaleString()}\n`;
+                    output += `PON: ${pon} | ONU ID: ${onuId}\n`;
+                    output += `Tipo: ${queryType}\n`;
+                    output += '='.repeat(50) + '\n\n';
+                    
+                    if (result.result.optical) {
+                        output += '📡 INFORMAÇÃO ÓPTICA 📡\n';
+                        output += '='.repeat(30) + '\n';
+                        output += result.result.optical + '\n\n';
+                    }
+                    
+                    if (result.result.info) {
+                        output += '📊 INFORMAÇÃO GERAL 📊\n';
+                        output += '='.repeat(30) + '\n';
+                        output += result.result.info + '\n\n';
+                    }
+                    
+                    output += '='.repeat(50) + '\n';
+                    output += 'Consulta concluída com sucesso!\n';
+                    
+                    textarea.value = output;
+                    textarea.scrollTop = textarea.scrollHeight;
+                    
+                    updateStatus('connected', 'Consulta concluída');
+                    showNotification(`Consulta PON ${pon} ONU ID ${onuId} executada!`, 'success');
+                } else {
+                    updateStatus('connected', 'Erro na consulta');
+                    textarea.value = `ERRO: ${result.result}`;
+                    showNotification(`Erro na consulta: ${result.result}`, 'error');
+                }
+            } catch (error) {
+                updateStatus('connected', 'Erro de rede');
+                showNotification(`Erro: ${error.message}`, 'error');
+            }
+        }
+        
+        async function disconnectFromOLT() {
+            if (!isConnected) {
+                showNotification('Não há conexão ativa', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/disconnect', {method: 'POST'});
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus('disconnected', 'Desconectado');
+                    showNotification('Desconectado da OLT com sucesso', 'success');
+                    discoveredONUs = [];
+                    document.getElementById('onu-table-container').style.display = 'none';
+                }
+            } catch (error) {
+                showNotification(`Erro: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').value = '';
+            showNotification('Resultados limpos', 'info');
+        }
+        
+        function clearONUList() {
+            discoveredONUs = [];
+            document.getElementById('onu-table-body').innerHTML = '';
+            document.getElementById('onu-count').textContent = '0';
+            document.getElementById('onu-table-container').style.display = 'none';
+            document.getElementById('debug-info').style.display = 'none';
+            showNotification('Lista de ONUs limpa', 'info');
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const debugInfo = document.getElementById('debug-info');
+            
+            if (debugMode) {
+                debugInfo.style.display = 'block';
+                debugInfo.innerHTML = `<strong>Modo Debug Ativo</strong><br>Verifique o console do navegador para detalhes.`;
+                console.log('Modo debug ativado. ONUs atuais:', discoveredONUs);
+                showNotification('Modo debug ativado', 'info');
+            } else {
+                debugInfo.style.display = 'none';
+                showNotification('Modo debug desativado', 'info');
+            }
+        }
+        
+        // Inicialização
+        updateStatus('disconnected', 'Desconectado - Configure a conexão acima');
+        
+        // Atalhos de teclado
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                if (document.activeElement.id === 'password') {
+                    connectToOLT();
+                } else if (document.activeElement.id === 'specific-onu') {
+                    querySpecificONT();
+                }
+            }
+        });
+        
+        // Carregar lista existente ao iniciar
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/get-onu-list');
+                const data = await response.json();
+                if (data.success && data.onu_list.length > 0) {
+                    discoveredONUs = data.onu_list;
+                    updateONUTable(discoveredONUs);
+                    document.getElementById('onu-table-container').style.display = 'block';
+                }
+            } catch (error) {
+                console.log('Não foi possível carregar lista de ONUs existente');
+            }
+        });
+    </script>
+</body>
+</html>
